@@ -1,17 +1,17 @@
 {
-  "name": "angular-vs-repeat",
-  "version": "1.1.7",
-  "description": "Virtual Scroll for AngularJS ngRepeat directive",
-  "homepage": "http://kamilkp.github.io/angular-vs-repeat",
+  "name": "ia-angular-vs-repeat",
+  "version": "1.0.0",
+  "description": "Virtual Scroll for AngularJS ngRepeat directive (IntelliAd Fork). This fork is needed to introduce a fix for a particular use case. Please do not use. Fix will be eventually merged to the origin and this package will be removed. For the original see: http://kamilkp.github.io/angular-vs-repeat",
+  "homepage": "",
   "author": {
-    "name": "Kamil Pekala",
-    "email": "kamilkp@gmail.com",
-    "url": "http://github.com/kamilkp"
+    "name": "",
+    "email": "",
+    "url": ""
   },
   "main": "src/angular-vs-repeat.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kamilkp/angular-vs-repeat.git"
+    "url": "https://github.com/mesmerizero/angular-vs-repeat.git"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
