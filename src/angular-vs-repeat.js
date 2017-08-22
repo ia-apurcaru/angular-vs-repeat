@@ -78,13 +78,13 @@
 
     var dde = document.documentElement,
         matchingFunction = dde.matches ? 'matches' :
-                            dde.matchesSelector ? 'matchesSelector' :
-                            dde.webkitMatches ? 'webkitMatches' :
-                            dde.webkitMatchesSelector ? 'webkitMatchesSelector' :
-                            dde.msMatches ? 'msMatches' :
+            dde.matchesSelector ? 'matchesSelector' :
+                dde.webkitMatches ? 'webkitMatches' :
+                    dde.webkitMatchesSelector ? 'webkitMatchesSelector' :
+                        dde.msMatches ? 'msMatches' :
                             dde.msMatchesSelector ? 'msMatchesSelector' :
-                            dde.mozMatches ? 'mozMatches' :
-                            dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
+                                dde.mozMatches ? 'mozMatches' :
+                                    dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
 
     var closestElement = angular.element.prototype.closest || function (selector) {
         var el = this[0].parentNode;
@@ -129,6 +129,14 @@
 
     function getScrollPos(element, scrollProp) {
         return element === window ? getWindowScroll()[scrollProp] : element[scrollProp];
+    }
+
+    function setScrollPos(element, scrollProp, scrollPos) {
+        if (element === window) {
+            // not implemented
+        } else {
+            element[scrollProp] = scrollPos;
+        }
     }
 
     function getScrollOffset(vsElement, scrollElement, isHorizontal) {
@@ -217,11 +225,11 @@
                             sizesPropertyExists = !!$attrs.vsSize || !!$attrs.vsSizeProperty,
                             $scrollParent = $attrs.vsScrollParent ?
                                 $attrs.vsScrollParent === 'window' ? angular.element(window) :
-                                closestElement.call(repeatContainer, $attrs.vsScrollParent) : repeatContainer,
+                                    closestElement.call(repeatContainer, $attrs.vsScrollParent) : repeatContainer,
                             $$options = 'vsOptions' in $attrs ? $scope.$eval($attrs.vsOptions) : {},
                             clientSize = $$horizontal ? 'clientWidth' : 'clientHeight',
                             offsetSize = $$horizontal ? 'offsetWidth' : 'offsetHeight',
-                            scrollPos = $$horizontal ? 'scrollLeft' : 'scrollTop';
+                            scrollProp = $$horizontal ? 'scrollLeft' : 'scrollTop';
 
                         $scope.totalSize = 0;
                         if (!('vsSize' in $attrs) && 'vsSizeProperty' in $attrs) {
@@ -241,7 +249,7 @@
                         $scope.elementSize = (+$attrs.vsRepeat) || getClientSize($scrollParent[0], clientSize) || 50;
                         $scope.offsetBefore = 0;
                         $scope.offsetAfter = 0;
-                        $scope.excess = 2;
+                        $scope.excess = 4;
 
                         if ($$horizontal) {
                             $beforeContent.css('height', '100%');
@@ -282,8 +290,8 @@
                                         angular.extend(s, item);
                                         s[lhs] = item;
                                         var size = ($attrs.vsSize || $attrs.vsSizeProperty) ?
-                                                        s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
-                                                        $scope.elementSize;
+                                            s.$eval($attrs.vsSize || $attrs.vsSizeProperty) :
+                                            $scope.elementSize;
                                         s.$destroy();
                                         return size;
                                     });
@@ -375,7 +383,7 @@
                         $scope.startIndex = 0;
                         $scope.endIndex = 0;
 
-                        function scrollHandler() {
+                        function scrollHandler(ev) {
                             if (updateInnerCollection()) {
                                 $scope.$digest();
                             }
@@ -442,9 +450,9 @@
                             _minStartIndex = originalLength;
                             _maxEndIndex = 0;
                             updateTotalSize(sizesPropertyExists ?
-                                                $scope.sizesCumulative[originalLength] :
-                                                $scope.elementSize * originalLength
-                                            );
+                                $scope.sizesCumulative[originalLength] :
+                                $scope.elementSize * originalLength
+                            );
                             updateInnerCollection();
 
                             $scope.$emit('vsRepeatReinitialized', $scope.startIndex, $scope.endIndex);
@@ -476,14 +484,14 @@
                         });
 
                         function updateInnerCollection() {
-                            var $scrollPosition = getScrollPos($scrollParent[0], scrollPos);
+                            var $scrollPosition = getScrollPos($scrollParent[0], scrollProp);
                             var $clientSize = getClientSize($scrollParent[0], clientSize);
 
                             var scrollOffset = repeatContainer[0] === $scrollParent[0] ? 0 : getScrollOffset(
-                                                    repeatContainer[0],
-                                                    $scrollParent[0],
-                                                    $$horizontal
-                                                );
+                                repeatContainer[0],
+                                $scrollParent[0],
+                                $$horizontal
+                            );
 
                             var __startIndex = $scope.startIndex;
                             var __endIndex = $scope.endIndex;
@@ -522,7 +530,7 @@
 
                                 __endIndex = Math.min(
                                     __startIndex + Math.ceil(
-                                        $clientSize / $scope.elementSize
+                                    $clientSize / $scope.elementSize
                                     ) + $scope.excess,
                                     originalLength
                                 );
@@ -559,11 +567,12 @@
                                 }
                                 else {
                                     digestRequired = $scope.startIndex !== _prevStartIndex ||
-                                                        $scope.endIndex !== _prevEndIndex;
+                                        $scope.endIndex !== _prevEndIndex;
                                 }
                             }
 
                             if (digestRequired) {
+
                                 $scope[collectionName] = originalCollection.slice($scope.startIndex, $scope.endIndex);
 
                                 // Emit the event
@@ -596,6 +605,12 @@
 
                                 $beforeContent.css(getLayoutProp(), o1 + 'px');
                                 $afterContent.css(getLayoutProp(), (total - o2) + 'px');
+
+                                // make sure the parent scroll stays in place //
+                                if ($scrollParent[0] !== window) {
+                                    setScrollPos($scrollParent[0], scrollProp, $scrollPosition);
+                                }
+
                             }
 
                             return digestRequired;
